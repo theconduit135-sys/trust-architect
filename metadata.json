@@ -1,0 +1,7 @@
+{
+  "name": "Sovereign Wealth Architecture",
+  "description": "AI-powered platform for asset protection, trust design, and legal blueprint generation.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

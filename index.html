@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trust Structure Architect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins (Headings) and Inter (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                50: '#f8fafc',
+                100: '#f1f5f9',
+                200: '#e2e8f0',
+                300: '#cbd5e1', 
+                400: '#64748b', /* Darkened: Was 500 */
+                500: '#475569', /* Darkened: Was 600 */
+                600: '#334155', /* Darkened: Was 700 */
+                700: '#1e293b', /* Darkened: Was 800 */
+                800: '#0f172a', /* Darkened: Was 900 */
+                900: '#020617', /* Darkened: Extra Dark */
+              },
+              // Matching the Screenshot's Orange
+              orange: {
+                400: '#FFB74D',
+                500: '#FF9F1C', 
+                600: '#F57C00',
+              },
+              // Matching the Screenshot's Blue
+              brandBlue: {
+                50: '#F0F6FF', // Light background
+                100: '#E0EAFF',
+                500: '#2D7FF9', // Link color
+                600: '#1A56DB',
+                900: '#1A2B49', // Heading color
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #F4F9FF; /* Light blue tint from screenshot */
+        color: #1e293b; /* Darkened from #334155 to Slate 800 */
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
+        color: #1A2B49; /* Deep Navy */
+      }
+
+      /* Primary CTA - The "Orange" Button */
+      .btn-primary {
+        background-color: #FF9F1C;
+        color: white;
+        border-radius: 9999px; /* Pill shape */
+        font-weight: 600;
+        box-shadow: 0 4px 14px 0 rgba(255, 159, 28, 0.39);
+        transition: all 0.2s ease-in-out;
+        border: none;
+      }
+      .btn-primary:hover {
+        background-color: #F57C00;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 159, 28, 0.23);
+      }
+      .btn-primary:disabled {
+        background-color: #cbd5e1;
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Secondary CTA - White with Orange Border */
+      .btn-secondary {
+        background-color: #FFFFFF;
+        color: #FF9F1C;
+        border: 2px solid #FF9F1C;
+        border-radius: 9999px;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+      }
+      .btn-secondary:hover {
+        background-color: #FFF8F0;
+        transform: translateY(-1px);
+      }
+
+      /* Tertiary/Nav Button */
+      .btn-nav {
+        color: #1A2B49;
+        font-weight: 500;
+        border-radius: 9999px;
+        transition: all 0.2s;
+      }
+      .btn-nav:hover {
+        color: #2D7FF9;
+        background-color: #F0F6FF;
+      }
+      .btn-nav.active {
+        color: #2D7FF9;
+        background-color: #E0EAFF;
+        font-weight: 600;
+      }
+      
+      /* Modern Card Style */
+      .card-modern {
+        background: #FFFFFF;
+        border-radius: 16px; /* Rounded corners */
+        border: 1px solid #EBF0F5;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); /* Soft wide shadow */
+        transition: all 0.3s ease;
+      }
+      .card-modern:hover {
+         transform: translateY(-5px);
+         box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12);
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+        "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
+        "jspdf": "https://esm.sh/jspdf@2.5.1",
+        "docx": "https://esm.sh/docx@8.5.0"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -42,8 +42,9 @@ export class LiveClient {
         } 
       });
 
+      // Updated to latest native audio model
       this.sessionPromise = this.ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
@@ -128,6 +129,7 @@ export class LiveClient {
     this.processor.onaudioprocess = (e) => {
       const inputData = e.inputBuffer.getChannelData(0);
       const pcmBlob = createPcmBlob(inputData);
+      // Solely rely on sessionPromise resolution for sending input to avoid race conditions
       this.sessionPromise?.then((session) => {
         session.sendRealtimeInput({ media: pcmBlob });
       });

@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trust Structure Architect</title>
+    <title>WealthBuilder | Elite Asset Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Poppins (Headings) and Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
       tailwind.config = {
@@ -16,133 +15,163 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
-              display: ['Poppins', 'sans-serif'],
+              display: ['Manrope', 'sans-serif'],
             },
             colors: {
+              brandBlue: {
+                50: '#f0f7ff',
+                100: '#e0effe',
+                500: '#3b82f6',
+                600: '#1d4ed8', // Darkened for better contrast
+                700: '#1e40af',
+                800: '#1e3a8a',
+                900: '#0f172a', // Deepest navy/black
+              },
+              wealth: {
+                50: '#fffbeb',
+                100: '#fef3c7',
+                400: '#fbbf24',
+                500: '#d97706', // Darkened from f59e0b for contrast
+                600: '#b45309',
+              },
               slate: {
                 50: '#f8fafc',
                 100: '#f1f5f9',
                 200: '#e2e8f0',
-                300: '#cbd5e1', 
-                400: '#64748b', /* Darkened: Was 500 */
-                500: '#475569', /* Darkened: Was 600 */
-                600: '#334155', /* Darkened: Was 700 */
-                700: '#1e293b', /* Darkened: Was 800 */
-                800: '#0f172a', /* Darkened: Was 900 */
-                900: '#020617', /* Darkened: Extra Dark */
-              },
-              // Matching the Screenshot's Orange
-              orange: {
-                400: '#FFB74D',
-                500: '#FF9F1C', 
-                600: '#F57C00',
-              },
-              // Matching the Screenshot's Blue
-              brandBlue: {
-                50: '#F0F6FF', // Light background
-                100: '#E0EAFF',
-                500: '#2D7FF9', // Link color
-                600: '#1A56DB',
-                900: '#1A2B49', // Heading color
+                300: '#cbd5e1',
+                400: '#64748b', // Shifted up
+                500: '#334155', // Shifted up (darker)
+                600: '#1e293b', // Darker
+                800: '#0f172a',
+                900: '#020617', // Purest blackish-blue
               }
+            },
+            boxShadow: {
+              'wizard': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.05)',
+              'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.15)',
+              'heavy': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             }
           }
         }
       }
     </script>
     <style>
+      :root {
+        --bg: #FFFFFF;
+        --panel: #F8FAFC;
+        --text: #020617; /* High contrast black */
+        --muted: #1e293b; /* Strong grey-black */
+        --accent: #d97706;
+        --brand: #1d4ed8;
+      }
+
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #F4F9FF; /* Light blue tint from screenshot */
-        color: #1e293b; /* Darkened from #334155 to Slate 800 */
+        background-color: #f8fafc;
+        color: #020617; /* Set default text to black */
+        margin: 0;
       }
       
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Poppins', sans-serif;
-        color: #1A2B49; /* Deep Navy */
+        font-family: 'Manrope', sans-serif;
+        color: #020617;
       }
 
-      /* Primary CTA - The "Orange" Button */
+      .text-gradient-blue {
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .text-gradient-wealth {
+        background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .glass-morphism {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      }
+
       .btn-primary {
-        background-color: #FF9F1C;
+        background: #1d4ed8;
         color: white;
-        border-radius: 9999px; /* Pill shape */
-        font-weight: 600;
-        box-shadow: 0 4px 14px 0 rgba(255, 159, 28, 0.39);
-        transition: all 0.2s ease-in-out;
-        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        border: 2px solid #1e3a8a;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .btn-primary:hover {
-        background-color: #F57C00;
+        background: #0f172a;
+        border-color: #020617;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 159, 28, 0.23);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4);
       }
-      .btn-primary:disabled {
-        background-color: #cbd5e1;
-        box-shadow: none;
-        cursor: not-allowed;
-        transform: none;
+      .btn-primary:active {
+        transform: translateY(0);
       }
 
-      /* Secondary CTA - White with Orange Border */
-      .btn-secondary {
-        background-color: #FFFFFF;
-        color: #FF9F1C;
-        border: 2px solid #FF9F1C;
-        border-radius: 9999px;
-        font-weight: 600;
-        transition: all 0.2s ease-in-out;
-      }
-      .btn-secondary:hover {
-        background-color: #FFF8F0;
-        transform: translateY(-1px);
-      }
-
-      /* Tertiary/Nav Button */
-      .btn-nav {
-        color: #1A2B49;
-        font-weight: 500;
-        border-radius: 9999px;
-        transition: all 0.2s;
-      }
-      .btn-nav:hover {
-        color: #2D7FF9;
-        background-color: #F0F6FF;
-      }
-      .btn-nav.active {
-        color: #2D7FF9;
-        background-color: #E0EAFF;
-        font-weight: 600;
-      }
-      
-      /* Modern Card Style */
-      .card-modern {
+      .card-white {
         background: #FFFFFF;
-        border-radius: 16px; /* Rounded corners */
-        border: 1px solid #EBF0F5;
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); /* Soft wide shadow */
+        border-radius: 24px;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
       }
-      .card-modern:hover {
-         transform: translateY(-5px);
-         box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12);
+      .card-white:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      }
+
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: #f1f5f9; }
+      ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 5px; }
+      ::-webkit-scrollbar-thumb:hover { background: #020617; }
+
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-scale-in {
+        animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      /* Force visibility of black text on light backgrounds */
+      .text-slate-500, .text-slate-600, .text-slate-400 {
+        color: #0f172a !important;
       }
     </style>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@^19.2.3",
-        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-        "react/": "https://esm.sh/react@^19.2.3/",
-        "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
-        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-        "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
-        "jspdf": "https://esm.sh/jspdf@2.5.1",
-        "docx": "https://esm.sh/docx@8.5.0"
-      }
-    }
-    </script>
-  </head>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/",
+    "jspdf": "https://esm.sh/jspdf@^4.0.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "docx": "https://esm.sh/docx@^9.5.1",
+    "react-markdown": "https://esm.sh/react-markdown@^10.1.0"
+  }
+}
+</script>
+</head>
   <body>
     <div id="root"></div>
   </body>

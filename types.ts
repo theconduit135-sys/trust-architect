@@ -1,5 +1,7 @@
 import { Type } from "@google/genai";
 
+export type UserTier = 'FOUNDATION' | 'STRATEGIC' | 'SOVEREIGN';
+
 export enum AppMode {
   WIZARD = 'WIZARD',
   TRUST_ARCHITECT = 'TRUST_ARCHITECT',
@@ -9,6 +11,8 @@ export enum AppMode {
   VOICE = 'VOICE',
   EDUCATION = 'EDUCATION',
   TEMPLATES = 'TEMPLATES',
+  CATALOG = 'CATALOG',
+  ASSET_TRANSFER = 'ASSET_TRANSFER',
 }
 
 export interface GroundingChunk {
@@ -33,6 +37,50 @@ export enum TrustType {
   UNSURE = 'Help Me Choose',
 }
 
+export enum AssetCategory {
+  HOUSE = 'HOUSE',
+  AIRPLANE = 'AIRPLANE',
+  EQUIPMENT = 'EQUIPMENT',
+  VEHICLE = 'VEHICLE',
+}
+
+export interface AssetTransferData {
+  id?: string;
+  trustId: string;
+  trustName: string;
+  category: AssetCategory | null;
+  
+  // Asset Identification
+  address?: string;
+  state?: string;
+  legalDescription?: string;
+  
+  tailNumber?: string;
+  serialNumber?: string;
+  makeModel?: string;
+  
+  equipmentName?: string;
+  quantity?: string;
+  location?: string;
+  
+  vin?: string;
+  year?: string;
+
+  // Lien / Lease
+  isLien: boolean;
+  isLease: boolean;
+  lenderName?: string;
+  accountNumber?: string;
+  startDate?: string;
+
+  // Attestations
+  attestNoLienRemoval: boolean;
+  attestPaymentRemains: boolean;
+  attestNoTitleTransfer: boolean;
+  signature?: string;
+  dateSigned?: string;
+}
+
 export interface WizardState {
   step: number;
   trustType: TrustType | null;
@@ -50,6 +98,7 @@ export interface Beneficiary {
 }
 
 export interface TrustWizardData {
+  id?: string;
   type: string;
   name: string;
   jurisdiction: string;
@@ -76,7 +125,6 @@ export interface TrustWizardData {
 
   beneficiaries: Beneficiary[];
   assets: string;
-  // Optional for Iron Chain flow within Wizard
   holdingLLC?: string;
   operatingLLC?: string;
 }
@@ -84,6 +132,13 @@ export interface TrustWizardData {
 export interface GeneratedDocument {
   title: string;
   content: string;
+}
+
+export interface LegalTemplate extends GeneratedDocument {
+  id: string;
+  category: string;
+  description: string;
+  minTier: UserTier;
 }
 
 export interface IronChainData {

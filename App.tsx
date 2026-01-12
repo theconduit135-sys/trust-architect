@@ -8,246 +8,185 @@ import { BusinessCredit } from './components/BusinessCredit';
 import { Education } from './components/Education';
 import { TemplateLibrary } from './components/TemplateLibrary';
 import { VoiceWidget } from './components/VoiceWidget';
-import { Pricing } from './components/Pricing';
+import { Catalog } from './components/Catalog';
 import { LoginModal } from './components/LoginModal';
-import { Star, Shield, LogOut, User, Lock } from 'lucide-react';
-
-export type UserTier = 'FOUNDATION' | 'STRATEGIC' | 'SOVEREIGN';
+import { AssetTransfer } from './components/AssetTransfer';
+import { useAuth } from './components/AuthContext';
+import { auth } from './services/firebase';
+import { signOut, sendEmailVerification } from 'firebase/auth';
+import { Star, Shield, LogOut, User, Lock, Loader2, Compass, ChevronRight, CheckCircle, HelpCircle, Zap, Globe, UserCheck, ShieldCheck, Briefcase, Landmark } from 'lucide-react';
 
 export default function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.WIZARD);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [userTier, setUserTier] = useState<UserTier>('SOVEREIGN'); // Defaulting to Sovereign for demo purposes
+  const { user, loading, userTier, hasActivePurchase, emailVerified } = useAuth();
 
   const handleNavClick = (targetMode: AppMode) => {
-    // 1. Basic Auth Check
-    if (targetMode !== AppMode.WIZARD && !isLoggedIn) {
+    // Ungated sections: Wizard (Assessment), Catalog (Pricing), and Education
+    if (targetMode === AppMode.WIZARD || targetMode === AppMode.CATALOG || targetMode === AppMode.EDUCATION) {
+      setMode(targetMode);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (!user) {
       setShowLogin(true);
       return;
     }
 
-    // 2. Tier Restriction Check
-    // Sovereign Only Modules: Iron Chain, Bulletproof, and Business Credit
-    if (targetMode === AppMode.IRON_CHAIN || targetMode === AppMode.BULLETPROOF || targetMode === AppMode.BUSINESS_CREDIT) {
-      if (userTier !== 'SOVEREIGN') {
-        alert("This module requires the Sovereign package. Please upgrade to access the Iron Chain™, Bulletproof Trust, and Corporate Credit systems.");
-        scrollToSection('features-section');
-        return;
-      }
+    if (!emailVerified) {
+      alert("Verification Required: Please check your email for the confirmation link.");
+      return;
     }
 
+    if (!hasActivePurchase) {
+      setMode(AppMode.CATALOG);
+      return;
+    }
+    
     setMode(targetMode);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    // For demo purposes, we log them in as Sovereign so they can verify the features.
-    // In a real app, this would be fetched from the backend.
-    setUserTier('SOVEREIGN'); 
-    setShowLogin(false);
-    
-    // Redirect logic
-    if (mode === AppMode.WIZARD) {
-        setMode(AppMode.TRUST_ARCHITECT);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setMode(AppMode.WIZARD);
-    window.scrollTo(0, 0);
-  };
-
-  const NavButton = ({ targetMode, label, restrictedTo }: { targetMode: AppMode, label: string, restrictedTo?: UserTier | UserTier[] }) => {
-     // Check lock status
-     let isLocked = false;
-     
-     // If restrictions are defined
-     if (restrictedTo) {
-         if (Array.isArray(restrictedTo)) {
-             // If userTier is NOT in the allowed array
-             if (!restrictedTo.includes(userTier)) isLocked = true;
-         } else {
-             // Single tier check (strict)
-             if (restrictedTo === 'SOVEREIGN' && userTier !== 'SOVEREIGN') isLocked = true;
-             // If a module is Strategic+, Foundation is locked
-             if (restrictedTo === 'STRATEGIC' && userTier === 'FOUNDATION') isLocked = true;
-         }
-     }
-     
-     const showLock = isLoggedIn && isLocked;
-
-     return (
-        <button
-            onClick={() => handleNavClick(targetMode)}
-            className={`px-4 py-2 text-sm flex items-center space-x-1 ${mode === targetMode ? 'btn-nav active' : 'btn-nav'}`}
-        >
-            <span>{label}</span>
-            {showLock && <Lock className="w-3 h-3 text-slate-400" />}
-        </button>
-     );
-  };
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <Loader2 className="w-10 h-10 text-brandBlue-600 animate-spin mb-4" />
+        <p className="text-slate-900 font-bold uppercase tracking-widest text-[10px]">Securely Opening Your Workspace...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F4F9FF] flex flex-col font-sans">
-      {/* Top Notification Bar */}
-      {!isLoggedIn && (
-        <div className="bg-orange-400 text-white text-xs md:text-sm font-bold text-center py-2 px-4 cursor-pointer" onClick={() => scrollToSection('features-section')}>
-          Protect Your Assets Today. Foundation Plans start at $249 (One-Time). <span className="underline">Get Started</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-brandBlue-100">
+      {/* Upper Security Banner */}
+      <div className="bg-brandBlue-900 text-white text-[10px] font-black py-2.5 px-6 flex items-center justify-center space-x-8 relative z-10 tracking-[0.15em]">
+        <span className="flex items-center gap-2 opacity-90">
+          <Lock className="w-3.5 h-3.5 text-wealth-400" /> AES-256 BANK-GRADE ENCRYPTION
+        </span>
+        <span className="hidden md:inline-flex items-center gap-2 opacity-90">
+          <ShieldCheck className="w-3.5 h-3.5 text-wealth-400" /> GUARANTEED ASSET PRIVACY
+        </span>
+        {user && !emailVerified && (
+          <button onClick={() => sendEmailVerification(user!)} className="text-wealth-400 underline hover:text-white transition-colors">
+            Resend Verification Link
+          </button>
+        )}
+      </div>
+
+      <header className="glass-morphism sticky top-0 z-50 px-8 h-20 flex items-center justify-between">
+        <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setMode(AppMode.WIZARD)}>
+          <div className="bg-brandBlue-600 p-2.5 rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+              <Shield className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex flex-col leading-none">
+             <span className="font-display font-extrabold text-2xl tracking-tight text-slate-900">WealthBuilder</span>
+             <span className="text-[9px] text-brandBlue-600 font-black uppercase tracking-[0.25em] mt-1">Sovereign Asset Protection</span>
+          </div>
         </div>
-      )}
+        
+        <nav className="hidden lg:flex items-center space-x-1">
+          {[
+            { mode: AppMode.WIZARD, label: '1. Strategic Design' },
+            { mode: AppMode.TRUST_ARCHITECT, label: '2. Architecture' },
+            { mode: AppMode.TEMPLATES, label: '3. Legal Library' },
+            { mode: AppMode.CATALOG, label: 'Pricing' }
+          ].map((item) => (
+            <button 
+              key={item.mode}
+              onClick={() => handleNavClick(item.mode)} 
+              className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl hover:bg-slate-200 ${mode === item.mode ? 'text-brandBlue-600 bg-white shadow-sm border-2 border-brandBlue-600' : 'text-slate-900'}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
-      {/* Header / Navbar */}
-      <header className="bg-white sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Logo Area */}
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setMode(AppMode.WIZARD)}>
-            <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-2 rounded-lg">
-                <Shield className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex flex-col leading-none">
-               <span className="font-display font-bold text-xl text-brandBlue-900 tracking-tight">TrustArchitect</span>
-               <span className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Software</span>
-            </div>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            <NavButton targetMode={AppMode.WIZARD} label="Strategy" />
-            <NavButton targetMode={AppMode.TRUST_ARCHITECT} label="Builder" />
-            {/* Business Credit is now SOVEREIGN only */}
-            <NavButton targetMode={AppMode.BUSINESS_CREDIT} label="Credit" restrictedTo="SOVEREIGN" />
-            <NavButton targetMode={AppMode.IRON_CHAIN} label="Iron Chain™" restrictedTo="SOVEREIGN" />
-            <NavButton targetMode={AppMode.BULLETPROOF} label="Bulletproof" restrictedTo="SOVEREIGN" />
-            <NavButton targetMode={AppMode.TEMPLATES} label="Templates" />
-            <NavButton targetMode={AppMode.EDUCATION} label="Academy" />
-          </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center space-x-4">
-             {isLoggedIn ? (
-                 <div className="flex items-center space-x-3">
-                    <div className="hidden lg:flex flex-col items-end text-right">
-                        <span className="text-xs font-bold text-slate-400 uppercase">{userTier} Member</span>
-                        <span className="text-sm font-bold text-brandBlue-900">John Doe</span>
-                    </div>
-                    <div className="w-10 h-10 bg-brandBlue-50 rounded-full flex items-center justify-center border border-brandBlue-100">
-                        <User className="w-5 h-5 text-brandBlue-600" />
-                    </div>
-                    <button 
-                        onClick={handleLogout}
-                        className="text-slate-400 hover:text-red-500 p-2"
-                        title="Logout"
-                    >
-                        <LogOut className="w-5 h-5" />
-                    </button>
-                 </div>
-             ) : (
-                <>
-                    <button 
-                        onClick={() => setShowLogin(true)}
-                        className="hidden lg:block text-brandBlue-900 font-semibold hover:text-brandBlue-500 text-sm"
-                    >
-                        Login
-                    </button>
-                    <button 
-                        onClick={() => scrollToSection('wizard-section')}
-                        className="btn-primary px-6 py-2.5 text-sm shadow-orange-200"
-                    >
-                        GET STARTED
-                    </button>
-                </>
-             )}
-          </div>
+        <div className="flex items-center space-x-5">
+           {user ? (
+               <div className="flex items-center space-x-4">
+                  <div className="hidden xl:flex flex-col items-end text-right">
+                      <span className="text-[9px] font-black text-brandBlue-600 uppercase tracking-[0.1em]">{userTier || 'FREE'} ACCESS</span>
+                      <span className="text-xs font-bold text-slate-900">{user.email?.split('@')[0]}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-2xl bg-white border-2 border-slate-300 flex items-center justify-center text-slate-900 shadow-sm">
+                      <User className="w-5 h-5" />
+                  </div>
+                  <button onClick={() => signOut(auth)} className="text-slate-900 hover:text-red-600 p-2 transition-colors">
+                      <LogOut className="w-5 h-5" />
+                  </button>
+               </div>
+           ) : (
+              <button onClick={() => setShowLogin(true)} className="btn-primary px-8 py-3 text-[11px] uppercase tracking-[0.15em] shadow-lg">
+                  Deploy Shield
+              </button>
+           )}
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
-        {/* Dynamic Title Section */}
-        {mode !== AppMode.WIZARD && (
-            <div className="mb-8">
-                <h1 className="text-3xl font-display font-bold text-brandBlue-900">{mode.replace(/_/g, ' ')}</h1>
-                <div className="h-1 w-20 bg-orange-400 rounded-full mt-2"></div>
-            </div>
-        )}
-
+      <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12 lg:py-20 relative z-10">
         {mode === AppMode.WIZARD && (
-          <div className="animate-fade-in-up">
-            {/* Hero Section */}
-            <div className="flex flex-col lg:flex-row items-center mb-16 gap-12">
-                <div className="flex-1 text-center lg:text-left space-y-6">
-                    <div className="inline-flex items-center space-x-1 text-orange-500 font-bold text-sm uppercase tracking-wide">
-                        <span>Built For Scalability</span>
-                        <div className="flex">
-                            <Star className="w-4 h-4 fill-current" />
-                            <Star className="w-4 h-4 fill-current" />
-                            <Star className="w-4 h-4 fill-current" />
-                        </div>
-                    </div>
-                    
-                    <h1 className="text-5xl lg:text-6xl font-display font-extrabold text-brandBlue-900 leading-tight">
-                        Empower Your <span className="text-brandBlue-500">Wealth</span> <br/>
-                        <span className="text-black">Architecture Today</span>
-                    </h1>
-                    
-                    <p className="text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                        Start or manage your asset protection strategy with our <strong>all-in-one Trust Architect</strong> software designed to simplify your workflow and secure your legacy.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                        <button 
-                            onClick={() => scrollToSection('wizard-section')} 
-                            className="btn-primary px-8 py-4 text-lg w-full sm:w-auto"
-                        >
-                            Start Architecture
-                        </button>
-                        <button 
-                            onClick={() => scrollToSection('features-section')}
-                            className="btn-secondary px-8 py-4 text-lg w-full sm:w-auto"
-                        >
-                            View Features
-                        </button>
-                    </div>
-
-                    <div className="flex items-center justify-center lg:justify-start space-x-2 text-sm font-semibold text-slate-700 pt-4">
-                        <div className="flex items-center text-orange-500"><Star className="w-5 h-5 fill-current" /></div>
-                        <span>One-time Payment</span>
-                        <span className="mx-2 text-slate-300">|</span>
-                        <div className="flex items-center text-orange-500"><Star className="w-5 h-5 fill-current" /></div>
-                        <span>Lifetime Access</span>
-                    </div>
+          <div className="animate-fade-in space-y-24">
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+                <div className="inline-flex items-center space-x-3 text-brandBlue-600 font-black text-[10px] uppercase tracking-[0.3em] bg-white px-5 py-2 rounded-full border-2 border-brandBlue-600 shadow-sm">
+                    <Star className="w-3.5 h-3.5 text-wealth-500 fill-current" />
+                    <span>Asset Design Advisor • Phase 1 of 6</span>
                 </div>
                 
-                <div className="flex-1 relative">
-                    {/* Abstract Background Blobs */}
-                    <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-blue-50 to-orange-50 rounded-full blur-3xl opacity-50 -z-10"></div>
-                    <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                        alt="Dashboard Preview" 
-                        className="rounded-2xl shadow-2xl border-4 border-white transform rotate-1 hover:rotate-0 transition-transform duration-500"
-                    />
+                <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-slate-900 leading-[1.05] tracking-tight">
+                    Shield your assets. <br />
+                    <span className="text-gradient-blue italic">Secure your legacy.</span>
+                </h1>
+                
+                <p className="text-xl text-slate-900 leading-relaxed max-w-2xl mx-auto font-bold">
+                    WealthBuilder provides the professional legal blueprints used by elite owners to protect their houses, businesses, and family holdings. One platform for total asset security.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-5 justify-center pt-4">
+                    <button onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })} className="btn-primary px-12 py-5 text-sm flex items-center gap-3 shadow-2xl group border-2 border-brandBlue-800">
+                        <Compass className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />
+                        START MY ASSET EVALUATION
+                    </button>
+                    <button onClick={() => setMode(AppMode.EDUCATION)} className="px-12 py-5 text-sm font-black border-2 border-slate-900 rounded-2xl bg-white hover:bg-slate-900 hover:text-white transition-all flex items-center gap-2 group shadow-sm text-slate-900">
+                        Explore the Protocol
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                </div>
+                
+                {/* Marketing-focused feature blocks */}
+                <div className="pt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                  <div className="p-8 bg-white rounded-[2rem] border-2 border-slate-200 shadow-premium flex flex-col gap-5 hover:border-brandBlue-600 transition-all duration-500 group">
+                    <div className="w-12 h-12 bg-brandBlue-50 rounded-2xl flex items-center justify-center text-brandBlue-600 shadow-inner group-hover:scale-110 transition-transform">
+                        <Zap className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-base">Instant Document Engine</h4>
+                      <p className="text-sm text-slate-900 mt-2 leading-relaxed font-semibold">Generate complete legal packets—from Private Trusts to Asset Assignments—in under 5 minutes.</p>
+                    </div>
+                  </div>
+                  <div className="p-8 bg-white rounded-[2rem] border-2 border-slate-200 shadow-premium flex flex-col gap-5 hover:border-wealth-500 transition-all duration-500 group">
+                    <div className="w-12 h-12 bg-wealth-50 rounded-2xl flex items-center justify-center text-wealth-600 shadow-inner group-hover:scale-110 transition-transform">
+                        <Globe className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-base">Strategic Asset Layering</h4>
+                      <p className="text-sm text-slate-900 mt-2 leading-relaxed font-semibold">Implement multi-state jurisdictional protocols like the Iron Chain™ to isolate risk and hide ownership.</p>
+                    </div>
+                  </div>
+                  <div className="p-8 bg-white rounded-[2rem] border-2 border-slate-200 shadow-premium flex flex-col gap-5 hover:border-emerald-600 transition-all duration-500 group">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-inner group-hover:scale-110 transition-transform">
+                        <UserCheck className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-base">AI-Guided Analysis</h4>
+                      <p className="text-sm text-slate-900 mt-2 leading-relaxed font-semibold">Our 'Aurelius' advisor uses expert legal logic to guide you to the perfect structure for your unique asset profile.</p>
+                    </div>
+                  </div>
                 </div>
             </div>
 
-            {/* Wizard Component */}
-            <div id="wizard-section" className="max-w-4xl mx-auto scroll-mt-24">
+            <div className="max-w-5xl mx-auto pt-10" id="wizard-start">
                  <Wizard onNavigate={handleNavClick} />
-            </div>
-            
-            {/* Pricing Section */}
-            <div id="features-section" className="mt-24 scroll-mt-24">
-                <Pricing />
             </div>
           </div>
         )}
@@ -257,111 +196,57 @@ export default function App() {
         {mode === AppMode.BULLETPROOF && <BulletproofTrust />}
         {mode === AppMode.BUSINESS_CREDIT && <BusinessCredit />}
         {mode === AppMode.TEMPLATES && <TemplateLibrary />}
-        {mode === AppMode.EDUCATION && <div className="animate-fade-in"><Education /></div>}
+        {mode === AppMode.EDUCATION && <Education />}
+        {mode === AppMode.CATALOG && <Catalog />}
+        {mode === AppMode.ASSET_TRANSFER && <AssetTransfer />}
       </main>
 
-      {/* Floating Widgets */}
       <VoiceWidget />
       
-      {/* Login Modal */}
       <LoginModal 
         isOpen={showLogin} 
         onClose={() => setShowLogin(false)} 
-        onLogin={handleLogin}
-        onGoToPricing={() => {
-            setShowLogin(false);
-            setMode(AppMode.WIZARD);
-            // Small delay to allow mode switch render
-            setTimeout(() => scrollToSection('features-section'), 100);
-        }}
+        onLogin={() => setShowLogin(false)} 
+        onGoToPricing={() => { setShowLogin(false); setMode(AppMode.CATALOG); }} 
       />
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-12 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-            <div className="flex justify-center items-center space-x-2 mb-6">
-                <Shield className="w-6 h-6 text-orange-500" />
-                <span className="font-display font-bold text-xl text-brandBlue-900">TrustArchitect</span>
+      <footer className="border-t-2 border-slate-300 py-20 mt-auto bg-white relative z-10">
+        <div className="max-w-7xl mx-auto px-8 text-center space-y-12">
+            <div className="flex flex-col items-center justify-center space-y-2 group">
+              <div className="bg-brandBlue-600 p-2 rounded-xl mb-4 border-2 border-brandBlue-800">
+                  <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-slate-900">WealthBuilder</div>
+              <div className="text-[10px] font-black uppercase tracking-[0.3em] text-brandBlue-600">Sovereign Asset Infrastructure</div>
             </div>
-            <p className="text-slate-500 text-sm max-w-md mx-auto mb-8">
-                Empowering individuals to take control of their sovereign wealth architecture through AI-driven design.
-            </p>
-            <div className="flex justify-center space-x-8 text-sm font-semibold text-brandBlue-900">
-                <button onClick={() => {
-                    if(mode !== AppMode.WIZARD) setMode(AppMode.WIZARD);
-                    setTimeout(() => scrollToSection('features-section'), 100);
-                }} className="hover:text-orange-500 transition-colors">Features</button>
-                
-                <button onClick={() => {
-                    if(mode !== AppMode.WIZARD) setMode(AppMode.WIZARD);
-                    setTimeout(() => scrollToSection('features-section'), 100);
-                }} className="hover:text-orange-500 transition-colors">Pricing</button>
-                
-                {!isLoggedIn && (
-                    <button onClick={() => setShowLogin(true)} className="hover:text-orange-500 transition-colors">Login</button>
-                )}
+
+            <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 text-[11px] font-black uppercase tracking-[0.15em] text-slate-900">
+                <button onClick={() => setMode(AppMode.CATALOG)} className="hover:text-brandBlue-600 transition-colors">Strategic Plans</button>
+                <button onClick={() => setMode(AppMode.EDUCATION)} className="hover:text-brandBlue-600 transition-colors">Protocol Academy</button>
+                <button onClick={() => setMode(AppMode.TEMPLATES)} className="hover:text-brandBlue-600 transition-colors">Asset Instruments</button>
+                <button onClick={() => setMode(AppMode.ASSET_TRANSFER)} className="hover:text-brandBlue-600 transition-colors">Property Transfer</button>
             </div>
-            <p className="mt-8 text-xs text-slate-400">
-                Powered by Google Gemini 2.5 Flash. Educational use only. Not legal advice.
+
+            <div className="bg-slate-100 p-10 rounded-[2.5rem] border-2 border-slate-300 max-w-3xl mx-auto shadow-inner">
+              <p className="text-xs leading-relaxed text-slate-900 font-bold italic">
+                Advanced AI Infrastructure • Expert Legal Logic • Designed for Pure Asset Defense
+              </p>
+              <p className="text-[10px] text-slate-900 mt-4 font-black uppercase tracking-[0.2em]">
+                WealthBuilder is a software platform for educational and structural generation purposes only. This platform is not a law firm and does not provide legal or tax advice.
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-8 opacity-100 grayscale-0 transition-all duration-700">
+                  <ShieldCheck className="w-5 h-5 text-brandBlue-600" />
+                  <Briefcase className="w-5 h-5 text-brandBlue-600" />
+                  <Landmark className="w-5 h-5 text-brandBlue-600" />
+                  <CheckCircle className="w-5 h-5 text-brandBlue-600" />
+              </div>
+            </div>
+            
+            <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">
+              Aurelius v3.2 • Secure Deployment Active
             </p>
         </div>
       </footer>
-
-      {/* Global Styles */}
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes scale-in {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bounce-slow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out forwards;
-        }
-        .animate-scale-in {
-            animation: scale-in 0.2s ease-out forwards;
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out forwards;
-        }
-        .animate-bounce-slow {
-            animation: bounce-slow 3s infinite ease-in-out;
-        }
-        .glass-panel {
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 4px;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-      `}</style>
     </div>
   );
 }
